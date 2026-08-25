@@ -3,6 +3,7 @@ package tests;
 import models.pojo.RegistrationBodyPojoModel;
 import models.pojo.RegistrationResponsePojoModel;
 import net.datafaker.Faker;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -13,11 +14,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RegistrationTests extends TestBase {
 
+    String username;
+    String password;
+
+    @BeforeEach
+    public void prepareTestData() {
+        Faker faker = new Faker();
+        username = faker.name().firstName();
+        password = faker.name().firstName();
+    }
+
     @Test
     public void successfulRegistrationTest_with_pojo() {
-        Faker faker = new Faker();
-        String username = faker.name().firstName();
-        String password = faker.name().firstName();
 
         RegistrationBodyPojoModel data = new RegistrationBodyPojoModel();
         data.setUsername(username);
@@ -40,10 +48,6 @@ public class RegistrationTests extends TestBase {
 
     @Test
     public void existingUser400Test() {
-        Faker faker = new Faker();
-        String username = faker.name().firstName();
-        String password = faker.name().firstName();
-
         RegistrationBodyPojoModel data = new RegistrationBodyPojoModel();
         data.setUsername(username);
         data.setPassword(password);
@@ -76,8 +80,6 @@ public class RegistrationTests extends TestBase {
     public void invalidUsername400Test() {
         Faker faker = new Faker();
         String username = faker.name().fullName();
-        String password = faker.name().firstName();
-
         RegistrationBodyPojoModel data = new RegistrationBodyPojoModel();
         data.setUsername(username);
         data.setPassword(password);
@@ -98,10 +100,6 @@ public class RegistrationTests extends TestBase {
 
     @Test
     public void negativeRegistration500Test() {
-        Faker faker = new Faker();
-        String username = faker.name().firstName();
-        String password = faker.name().firstName();
-
         RegistrationBodyPojoModel data = new RegistrationBodyPojoModel();
         data.setUsername(username);
         data.setPassword(password);
