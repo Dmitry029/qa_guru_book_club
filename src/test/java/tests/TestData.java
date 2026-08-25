@@ -9,6 +9,7 @@ public class TestData {
     public static final String LOGIN_TOKEN_PREFIX = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
     public static final String LOGIN_WRONG_CREDENTIALS_ERROR = "Invalid username or password.";
     public static final String EMPTY_USERNAME_ERROR = "This field may not be blank.";
+    public static final String EMPTY_LOGOUT_BODY_ERROR = "This field is required.";
 
     public static final String REGISTRATION_EXISTING_USER_ERROR =
         "A user with that username already exists.";
