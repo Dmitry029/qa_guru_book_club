@@ -3,6 +3,7 @@ package tests;
 import models.login.LoginBodyModel;
 import models.login.SuccessfulLoginResponseModel;
 import models.login.WrongCredentialsLoginResponseModel;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -10,34 +11,27 @@ import static io.restassured.http.ContentType.JSON;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
+import static specs.login.LoginSpec.loginRequestSpec;
+import static specs.login.LoginSpec.successfulLoginResponseSpec;
+import static tests.TestData.*;
 
 public class UpdateUserTests extends TestBase {
 
-    String username = "qaguru";
-    String password = "qaguru123";
-    String wrongPassword = "qaguru1234";
 
     @Test
     //@Disabled
-    public void successfulLoginTest() {
-        LoginBodyModel loginData = new LoginBodyModel(username, password);
+    public void successfulUpdateUserTest() {
+        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
 
-        SuccessfulLoginResponseModel loginResponse = given()
-            .log().all()
-            .contentType(JSON)
+        SuccessfulLoginResponseModel loginResponse = given(loginRequestSpec)
             .body(loginData)
-            .basePath("/api/v1")
             .when()
             .post("/auth/token/")
             .then()
-            .log().all()
-            .statusCode(200)
-            .body(matchesJsonSchemaInClasspath("schemas/login/successful_login_response_schema.json"))
-            .body("access", notNullValue())
-            .body("refresh", notNullValue())
+            .spec(successfulLoginResponseSpec)
             .extract().as(SuccessfulLoginResponseModel.class);
 
-        String expectedTokenPath = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+        String expectedTokenPath = LOGIN_TOKEN_PREFIX;
         String actualAccess = loginResponse.access();
         String actualRefresh = loginResponse.refresh();
 
@@ -47,9 +41,9 @@ public class UpdateUserTests extends TestBase {
     }
 
     @Test
-    //@Disabled
+    @Disabled
     public void wrongCredentialsLoginTest() {
-        LoginBodyModel loginData = new LoginBodyModel(username, wrongPassword);
+        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_WRONG_PASSWORD);
 
         WrongCredentialsLoginResponseModel loginResponse = given()
             .log().all()
