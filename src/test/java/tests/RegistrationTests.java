@@ -4,6 +4,7 @@ import models.registration.lombok.RegistrationBodyLombokModel;
 import models.registration.lombok.RegistrationResponseLombokModel;
 import models.registration.records.ExistingUserResponseRecordsModel;
 import models.registration.records.RegistrationBodyRecordsModel;
+import models.registration.records.RegistrationResponseRecordsModel;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ public class RegistrationTests extends TestBase {
 
         RegistrationBodyRecordsModel data = new RegistrationBodyRecordsModel (username, password);
 
-        RegistrationResponseLombokModel registrationResponse = given()
+        RegistrationResponseRecordsModel  registrationResponse = given()
             .log().all()
             .contentType(JSON)
             .body(data)
@@ -63,9 +64,9 @@ public class RegistrationTests extends TestBase {
             .log().all()
             .statusCode(201)
             .extract()
-            .as(RegistrationResponseLombokModel.class);
+            .as(RegistrationResponseRecordsModel.class);
 
-        assertEquals(username, registrationResponse.getUsername());
+        assertEquals(username, registrationResponse.username());
     }
 
     @Test
