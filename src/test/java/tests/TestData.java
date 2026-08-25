@@ -8,4 +8,5 @@ public class TestData {
 
     public static final String LOGIN_USERNAME = "user8";
     public static final String LOGIN_PASSWORD = "user8";
+
 }
