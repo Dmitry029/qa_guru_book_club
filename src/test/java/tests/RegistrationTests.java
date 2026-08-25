@@ -9,11 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static specs.registration.RegistrationSpec.*;
 
 public class RegistrationTests extends TestBase {
 
@@ -32,19 +31,12 @@ public class RegistrationTests extends TestBase {
 
         RegistrationBodyModel data = new RegistrationBodyModel(username, password);
 
-        SuccessfulRegistrationResponseModel registrationResponse = given()
-            .log().all()
-            .contentType(JSON)
+        SuccessfulRegistrationResponseModel registrationResponse = given(registrationRequestSpec)
             .body(data)
             .when()
             .post("/users/register/")
             .then()
-            .log().all()
-            .statusCode(201)
-            .body(matchesJsonSchemaInClasspath("schemas/registration/successful_registration_response_schema.json"))
-            .body("id", notNullValue())
-            .body("username", notNullValue())
-            .body("remoteAddr", notNullValue())
+            .spec(successfulRegistrationResponseSpec)
             .extract()
             .as(SuccessfulRegistrationResponseModel.class);
 
@@ -58,27 +50,19 @@ public class RegistrationTests extends TestBase {
     public void existingUser400Test() {
         RegistrationBodyModel data = new RegistrationBodyModel(username, password);
 
-        given()
-            .log().all()
-            .contentType(JSON)
+        given(registrationRequestSpec)
             .body(data)
             .when()
             .post("/users/register/")
             .then()
-            .log().all()
-            .statusCode(201)
-            .body("username", is(username))
-            .body("id", notNullValue());
+            .spec(successfulRegistrationResponseSpec);
 
-        ExistingUserResponseModel response = given()
-            .log().all()
-            .contentType(JSON)
+        ExistingUserResponseModel response = given(registrationRequestSpec)
             .body(data)
             .when()
             .post("/users/register/")
             .then()
-            .log().all()
-            .statusCode(400)
+            .spec(existingUserRegistrationResponseSpec)
             .extract()
             .as(ExistingUserResponseModel.class);
 
@@ -117,33 +101,5 @@ public class RegistrationTests extends TestBase {
             .then()
             .statusCode(500);
     }
-
-     /*@Test
-    public void successfulRegistrationTest_with_lombok() {
-
-        RegistrationBodyLombokModel data = new RegistrationBodyLombokModel();
-        data.setUsername(username);
-        data.setPassword(password);
-
-        RegistrationResponseLombokModel registrationResponse = given()
-            .log().all()
-            .contentType(JSON)
-            .body(data)
-            .when()
-            .post("/users/register/")
-            .then()
-            .log().all()
-            .statusCode(201)
-            .body(matchesJsonSchemaInClasspath("schemas/registration/successful_registration_response_schema.json"))
-            .body("id", notNullValue())
-            .body("username", notNullValue())
-            .body("remoteAddr", notNullValue())
-
-
-
-            .extract()
-            .as(RegistrationResponseLombokModel.class);
-
-        assertEquals(username, registrationResponse.getUsername());
-    }*/
 }
+//todo move to specs
