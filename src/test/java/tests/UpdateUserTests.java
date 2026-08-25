@@ -62,7 +62,6 @@ public class UpdateUserTests extends TestBase {
 
         String expectedDetailError = "Invalid username or password.";
         String actualDetailError = loginResponse.detail();
-
         assertThat(actualDetailError).isEqualTo(expectedDetailError);
     }
 }
