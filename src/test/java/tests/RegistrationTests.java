@@ -1,8 +1,9 @@
 package tests;
 
-import models.lombok.RegistrationBodyLombokModel;
-import models.lombok.RegistrationResponseLombokModel;
-import models.records.RegistrationBodyRecordsModel;
+import models.registration.lombok.RegistrationBodyLombokModel;
+import models.registration.lombok.RegistrationResponseLombokModel;
+import models.registration.records.ExistingUserResponseRecordsModel;
+import models.registration.records.RegistrationBodyRecordsModel;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,7 +84,7 @@ public class RegistrationTests extends TestBase {
             .body("username", is(username))
             .body("id", notNullValue());
 
-        given()
+        ExistingUserResponseRecordsModel response = given()
             .log().all()
             .contentType(JSON)
             .body(data)
@@ -92,7 +93,11 @@ public class RegistrationTests extends TestBase {
             .then()
             .log().all()
             .statusCode(400)
-            .body("username[0]", is("A user with that username already exists."));
+            .extract()
+            .as(ExistingUserResponseRecordsModel.class);
+
+        String expectedError = "A user with that username already exists.";
+        assertEquals(expectedError, response.username().getFirst());
     }
 
     @Test
