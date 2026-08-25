@@ -24,21 +24,18 @@ def restAssuredVersion = "6.0.0",
 
 dependencies {
     testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
-    testImplementation("io.rest-assured:rest-assured:$restAssuredVersion")
-    testImplementation("io.rest-assured:json-schema-validator:$restAssuredVersion")
-
-// Jackson (правильный groupId)
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-
-    testImplementation("net.datafaker:datafaker:$datafakerVersion")
-// Без явной версии — возьмётся из BOM
+    // Без явной версии — возьмётся из BOM
     testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testImplementation("org.slf4j:slf4j-simple:$slf4jVersion")
-    testImplementation("org.assertj:assertj-core:$assertjVersion")
-
-// Опционально: движок и лаунчер будут подхватываться через BOM
+    // Опционально: движок и лаунчер будут подхватываться через BOM
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testImplementation("io.rest-assured:rest-assured:$restAssuredVersion")
+    testImplementation("io.rest-assured:json-schema-validator:$restAssuredVersion")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    testImplementation("net.datafaker:datafaker:$datafakerVersion")
+    testImplementation("org.slf4j:slf4j-simple:$slf4jVersion")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
 }
 
 tasks.withType(Test) {
