@@ -8,11 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.http.ContentType.JSON;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static specs.registration.RegistrationSpec.*;
+import static tests.TestData.*;
 
 public class RegistrationTests extends TestBase {
 
@@ -41,13 +40,11 @@ public class RegistrationTests extends TestBase {
             .as(SuccessfulRegistrationResponseModel.class);
 
         assertEquals(username, registrationResponse.username());
-        String ipAddrRegexp = "^((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}"
-            + "(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)$";
-        assertThat(registrationResponse.remoteAddr()).matches(ipAddrRegexp);
+        assertThat(registrationResponse.remoteAddr()).matches(REGISTRATION_IP_REGEXP);
     }
 
     @Test
-    public void existingUser400Test() {
+    public void existingUserWrongRegistrationTest() {
         RegistrationBodyModel data = new RegistrationBodyModel(username, password);
 
         given(registrationRequestSpec)
@@ -66,8 +63,7 @@ public class RegistrationTests extends TestBase {
             .extract()
             .as(ExistingUserResponseModel.class);
 
-        String expectedError = "A user with that username already exists.";
-        assertEquals(expectedError, response.username().getFirst());
+        assertEquals(REGISTRATION_EXISTING_USER_ERROR, response.username().getFirst());
     }
 
     @Test
@@ -76,25 +72,23 @@ public class RegistrationTests extends TestBase {
         String username = faker.name().fullName();
         RegistrationBodyModel data = new RegistrationBodyModel(username, password);
 
-        given()
-            .log().all()
-            .contentType(JSON)
+        ExistingUserResponseModel response = given(registrationRequestSpec)
             .body(data)
             .when()
             .post("/users/register/")
             .then()
-            .log().all()
-            .statusCode(400)
-            .body("username[0]",
-                is("Enter a valid username. This value may contain only letters, numbers, and @/./+/-/_ characters."));
+            .spec(invalidUserNameRegistrationResponseSpec)
+            .extract()
+            .as(ExistingUserResponseModel.class);
 
+        assertEquals(REGISTRATION_EXISTING_INVALID_USER_NAME_ERROR, response.username().getFirst());
     }
 
     @Test
     public void negativeRegistration500Test() {
         RegistrationBodyModel data = new RegistrationBodyModel(username, password);
 
-        given()
+        given(registrationRequestSpec)
             .body(data)
             .when()
             .post("/users/register")
@@ -102,4 +96,3 @@ public class RegistrationTests extends TestBase {
             .statusCode(500);
     }
 }
-//todo move to specs
