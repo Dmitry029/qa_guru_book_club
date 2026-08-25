@@ -1,7 +1,8 @@
 package tests;
 
-import models.pojo.RegistrationBodyPojoModel;
-import models.pojo.RegistrationResponsePojoModel;
+import models.lombok.RegistrationBodyLombokModel;
+import models.lombok.RegistrationResponseLombokModel;
+import models.records.RegistrationBodyRecordsModel;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,13 +26,13 @@ public class RegistrationTests extends TestBase {
     }
 
     @Test
-    public void successfulRegistrationTest_with_pojo() {
+    public void successfulRegistrationTest_with_lombok() {
 
-        RegistrationBodyPojoModel data = new RegistrationBodyPojoModel();
+        RegistrationBodyLombokModel data = new RegistrationBodyLombokModel();
         data.setUsername(username);
         data.setPassword(password);
 
-        RegistrationResponsePojoModel registrationResponse = given()
+        RegistrationResponseLombokModel registrationResponse = given()
             .log().all()
             .contentType(JSON)
             .body(data)
@@ -41,16 +42,34 @@ public class RegistrationTests extends TestBase {
             .log().all()
             .statusCode(201)
             .extract()
-            .as(RegistrationResponsePojoModel.class);
+            .as(RegistrationResponseLombokModel.class);
+
+        assertEquals(username, registrationResponse.getUsername());
+    }
+
+    @Test
+    public void successfulRegistrationTest_with_records() {
+
+        RegistrationBodyRecordsModel data = new RegistrationBodyRecordsModel (username, password);
+
+        RegistrationResponseLombokModel registrationResponse = given()
+            .log().all()
+            .contentType(JSON)
+            .body(data)
+            .when()
+            .post("/register/")
+            .then()
+            .log().all()
+            .statusCode(201)
+            .extract()
+            .as(RegistrationResponseLombokModel.class);
 
         assertEquals(username, registrationResponse.getUsername());
     }
 
     @Test
     public void existingUser400Test() {
-        RegistrationBodyPojoModel data = new RegistrationBodyPojoModel();
-        data.setUsername(username);
-        data.setPassword(password);
+        RegistrationBodyRecordsModel data = new RegistrationBodyRecordsModel (username, password);
 
         given()
             .log().all()
@@ -80,9 +99,7 @@ public class RegistrationTests extends TestBase {
     public void invalidUsername400Test() {
         Faker faker = new Faker();
         String username = faker.name().fullName();
-        RegistrationBodyPojoModel data = new RegistrationBodyPojoModel();
-        data.setUsername(username);
-        data.setPassword(password);
+        RegistrationBodyRecordsModel data = new RegistrationBodyRecordsModel (username, password);
 
         given()
             .log().all()
@@ -100,9 +117,7 @@ public class RegistrationTests extends TestBase {
 
     @Test
     public void negativeRegistration500Test() {
-        RegistrationBodyPojoModel data = new RegistrationBodyPojoModel();
-        data.setUsername(username);
-        data.setPassword(password);
+        RegistrationBodyRecordsModel data = new RegistrationBodyRecordsModel (username, password);
 
         given()
             .body(data)
