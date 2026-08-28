@@ -3,7 +3,11 @@ package tests;
 import models.login.LoginBodyModel;
 import models.login.SuccessfulLoginResponseModel;
 import models.login.WrongCredentialsLoginResponseModel;
+import models.user.UpdateUserBodyModel;
+import models.user.UserResponseModel;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -14,30 +18,32 @@ import static org.hamcrest.Matchers.notNullValue;
 import static specs.login.LoginSpec.loginRequestSpec;
 import static specs.login.LoginSpec.successfulLoginResponseSpec;
 import static tests.TestData.*;
+import static tests.TestData.UPDATED_EMAIL;
 
 public class UpdateUserTests extends TestBase {
 
+    private String accessToken;
+
+    @BeforeEach
+    public void auth() {
+        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+        accessToken = api.auth.loginAndGetAccessToken(loginData);
+    }
 
     @Test
-    //@Disabled
+    @DisplayName("Успешное обновление имени, фамилии и email")
     public void successfulUpdateUserTest() {
-        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+        UpdateUserBodyModel updateData = new UpdateUserBodyModel(
+            UPDATED_FIRST_NAME,
+            UPDATED_LAST_NAME,
+            UPDATED_EMAIL
+        );
 
-        SuccessfulLoginResponseModel loginResponse = given(loginRequestSpec)
-            .body(loginData)
-            .when()
-            .post("/auth/token/")
-            .then()
-            .spec(successfulLoginResponseSpec)
-            .extract().as(SuccessfulLoginResponseModel.class);
+        UserResponseModel response = api.users.updateUser(accessToken, updateData);
 
-        String expectedTokenPath = LOGIN_TOKEN_PREFIX;
-        String actualAccess = loginResponse.access();
-        String actualRefresh = loginResponse.refresh();
-
-        assertThat(actualAccess).startsWith(expectedTokenPath);
-        assertThat(actualRefresh).startsWith(expectedTokenPath);
-        assertThat(actualAccess).isNotEqualTo(actualRefresh);
+        assertThat(response.firstName()).isEqualTo(UPDATED_FIRST_NAME);
+        assertThat(response.lastName()).isEqualTo(UPDATED_LAST_NAME);
+        assertThat(response.email()).isEqualTo(UPDATED_EMAIL);
     }
 
     @Test

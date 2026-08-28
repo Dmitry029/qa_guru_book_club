@@ -19,7 +19,8 @@ def restAssuredVersion = "6.0.0",
     slf4jVersion = "2.0.17",
     datafakerVersion = "2.5.4",
     jacksonVersion = "2.22.1",
-    assertjVersion = "3.27.7"
+    assertjVersion = "3.27.7",
+    allureVersion = "2.25.0"
 
 
 dependencies {
@@ -36,6 +37,7 @@ dependencies {
     testImplementation("net.datafaker:datafaker:$datafakerVersion")
     testImplementation("org.slf4j:slf4j-simple:$slf4jVersion")
     testImplementation("org.assertj:assertj-core:$assertjVersion")
+    testImplementation("io.qameta.allure:allure-rest-assured:$allureVersion")
 }
 
 tasks.withType(Test) {

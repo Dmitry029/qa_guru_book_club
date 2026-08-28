@@ -21,4 +21,9 @@ public class TestData {
         "^((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}"
             + "(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)$";
 
+    public static final String UPDATED_FIRST_NAME = "TestFirstName";
+    public static final String UPDATED_LAST_NAME = "TestFirstLastName";
+    public static final String UPDATED_EMAIL = "test@test.com";
+    public static final String INVALID_EMAIL = "invalid_email_com";
+
 }

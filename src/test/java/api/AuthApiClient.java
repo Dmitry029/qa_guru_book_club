@@ -1,14 +1,13 @@
-package models.login;
+package api;
 
 import io.qameta.allure.Step;
-
-import java.util.List;
+import models.login.LoginBodyModel;
 
 import static io.restassured.RestAssured.given;
 import static specs.login.LoginSpec.loginRequestSpec;
 import static specs.login.LoginSpec.successfulLoginResponseSpec;
 
-public record EmptyPasswordResponseModel(List<String> password) {
+public class AuthApiClient {
 
     @Step("Авторизация и получение access-токена")
     public String loginAndGetAccessToken(LoginBodyModel loginBody) {
