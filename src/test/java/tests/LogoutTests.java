@@ -23,26 +23,14 @@ public class LogoutTests extends TestBase {
     @DisplayName("Успешный выход из аккаунта с валидным refresh-токеном")
     public void successfulLogoutTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
-
-        String refreshToken = step("Авторизация и получение токена", () ->
-            given(loginRequestSpec)
-                .body(loginData)
-                .when()
-                .post("/auth/token/")
-                .then()
-                .spec(successfulLoginResponseSpec)
-                .extract().path("refresh"));
+        String refreshToken = step("Авторизация и получение токена", () ->{
+            LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+            return api.auth.loginAndGetRefreshToken(loginData);
+        });
 
         step("Отправка запроса logout с refresh-токеном и проверка ответа (200)", () -> {
             LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
-            given(logoutRequestSpec)
-                .body(logoutData)
-                .basePath("/api/v1")
-                .when()
-                .post("/auth/logout/")
-                .then()
-                .spec(successfulLogoutResponseSpec);
+            api.auth.logout(logoutData);
         });
     }
 
@@ -50,16 +38,10 @@ public class LogoutTests extends TestBase {
     @DisplayName("Неуспешный выход из аккаунта с пустым телом запроса")
     public void logoutWithoutBodyTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
-
-        step("Авторизация и получение токена", () ->
-            given(loginRequestSpec)
-                .body(loginData)
-                .when()
-                .post("/auth/token/")
-                .then()
-                .spec(successfulLoginResponseSpec)
-        );
+        step("Авторизация и получение токена", () ->{
+            LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+            api.auth.loginAndGetRefreshToken(loginData);
+        });
 
         EmptyBodyModel response = step("Отправка запроса logout с пустым body", () ->
             given(logoutRequestSpec)
@@ -77,16 +59,11 @@ public class LogoutTests extends TestBase {
     @Test
     @DisplayName("Ошибка 404 при неправильном указании basePath")
     public void incorrectBasePath404Test() {
-        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
 
-        String refreshToken = step("Авторизация и получение токена", () ->
-            given(loginRequestSpec)
-                .body(loginData)
-                .when()
-                .post("/auth/token/")
-                .then()
-                .spec(successfulLoginResponseSpec)
-                .extract().path("refresh"));
+        String refreshToken = step("Авторизация и получение токена", () ->{
+            LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+            return api.auth.loginAndGetRefreshToken(loginData);
+        });
 
         step("Отправка запроса logout с неправильным basePath и проверка ответа (404)", () -> {
             LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
