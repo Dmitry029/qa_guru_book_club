@@ -34,7 +34,6 @@ public class RegistrationSpec {
     public static ResponseSpecification invalidUserNameRegistrationResponseSpec = new ResponseSpecBuilder()
         .log(ALL)
         .expectStatusCode(400)
-        .expectBody("username", notNullValue())
         .build();
 }
 

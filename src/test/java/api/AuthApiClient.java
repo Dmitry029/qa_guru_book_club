@@ -2,6 +2,7 @@ package api;
 
 import io.qameta.allure.Step;
 import models.login.LoginBodyModel;
+import models.login.SuccessfulLoginResponseModel;
 import models.loguot.LogoutBodyModel;
 
 import static io.restassured.RestAssured.given;
@@ -44,5 +45,17 @@ public class AuthApiClient {
             .post("/auth/logout/")
             .then()
             .spec(successfulLogoutResponseSpec);
+    }
+
+    @Step("Авторизация и получение ответа в виде объекта класса SuccessfulLoginResponseModel")
+    public SuccessfulLoginResponseModel login(LoginBodyModel loginBody) {
+        return given(loginRequestSpec)
+            .body(loginBody)
+            .when()
+            .post("/auth/token/")
+            .then()
+            .spec(successfulLoginResponseSpec)
+            .extract()
+            .as(SuccessfulLoginResponseModel.class);
     }
 }

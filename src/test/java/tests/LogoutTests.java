@@ -10,9 +10,8 @@ import org.junit.jupiter.api.Test;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static specs.login.LoginSpec.loginRequestSpec;
-import static specs.login.LoginSpec.successfulLoginResponseSpec;
-import static specs.logout.LogoutSpec.*;
+import static specs.logout.LogoutSpec.emptyBodyResponseSpec;
+import static specs.logout.LogoutSpec.logoutRequestSpec;
 import static tests.TestData.*;
 
 @Feature("Выход из аккаунта")
@@ -22,9 +21,11 @@ public class LogoutTests extends TestBase {
     @Test
     @DisplayName("Успешный выход из аккаунта с валидным refresh-токеном")
     public void successfulLogoutTest() {
+        LoginBodyModel loginData = step("Подготовка валидных данных для успешного входа", () ->
+            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
+        );
 
-        String refreshToken = step("Авторизация и получение токена", () ->{
-            LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+        String refreshToken = step("Авторизация и получение токена", () -> {
             return api.auth.loginAndGetRefreshToken(loginData);
         });
 
@@ -38,8 +39,11 @@ public class LogoutTests extends TestBase {
     @DisplayName("Неуспешный выход из аккаунта с пустым телом запроса")
     public void logoutWithoutBodyTest() {
 
-        step("Авторизация и получение токена", () ->{
-            LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+        LoginBodyModel loginData = step("Подготовка валидных данных для успешного входа", () ->
+            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
+        );
+
+        step("Авторизация и получение токена", () -> {
             api.auth.loginAndGetRefreshToken(loginData);
         });
 
@@ -60,8 +64,11 @@ public class LogoutTests extends TestBase {
     @DisplayName("Ошибка 404 при неправильном указании basePath")
     public void incorrectBasePath404Test() {
 
-        String refreshToken = step("Авторизация и получение токена", () ->{
-            LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+        LoginBodyModel loginData = step("Подготовка валидных данных для успешного входа", () ->
+            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
+        );
+
+        String refreshToken = step("Авторизация и получение токена", () -> {
             return api.auth.loginAndGetRefreshToken(loginData);
         });
 
