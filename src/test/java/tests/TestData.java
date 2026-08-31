@@ -28,4 +28,10 @@ public class TestData {
     public static final String UPDATED_EMAIL = "test@test.com";
     public static final String INVALID_EMAIL = "invalid_email_com";
 
+    public static final int NONEXISTENT_CLUB_ID = 999999999;
+    public static final String AUTH_CREDENTIALS_ERROR = "Authentication credentials were not provided.";
+    public static final String NOT_FOUND_ERROR = "No Club matches the given query.";
+    public static final String CLUB_TELEGRAM_LINK = "https://t.me/qa_guru_test";
+    public static final String EMPTY_FIELD_ERROR = "This field may not be blank.";
+
 }
