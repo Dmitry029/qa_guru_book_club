@@ -8,10 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.qameta.allure.Allure.step;
-import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static specs.logout.LogoutSpec.emptyBodyResponseSpec;
-import static specs.logout.LogoutSpec.logoutRequestSpec;
 import static tests.TestData.*;
 
 @Feature("Выход из аккаунта")
@@ -21,49 +18,60 @@ public class LogoutTests extends TestBase {
     @Test
     @DisplayName("Успешный выход из аккаунта с валидным refresh-токеном")
     public void successfulLogoutTest() {
-        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
-        String refreshToken = api.auth.loginAndGetRefreshToken(loginData);
+        LoginBodyModel loginData = step("Подготовка данных для авторизации", () ->
+            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
+        );
 
-        step("Отправка запроса logout с refresh-токеном и проверка ответа (200)", () -> {
-            LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
-            api.auth.logout(logoutData);
-        });
+        String refreshToken = step("Авторизация и получение refresh-токена", () ->
+            api.auth.loginAndGetRefreshToken(loginData)
+        );
+
+        LogoutBodyModel logoutData = step("Подготовка данных для logout", () ->
+            new LogoutBodyModel(refreshToken)
+        );
+
+        step("Отправка запроса logout с refresh-токеном", () ->
+            api.auth.logout(logoutData)
+        );
     }
 
     @Test
     @DisplayName("Неуспешный выход из аккаунта с пустым телом запроса")
     public void logoutWithoutBodyTest() {
-        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
-        api.auth.loginAndGetRefreshToken(loginData);
+        LoginBodyModel loginData = step("Подготовка данных для авторизации", () ->
+            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
+        );
+
+        step("Авторизация", () ->
+            api.auth.loginAndGetRefreshToken(loginData)
+        );
 
         EmptyBodyModel response = step("Отправка запроса logout с пустым body", () ->
-            given(logoutRequestSpec)
-                .body("")
-                .basePath("/api/v1")
-                .when()
-                .post("/auth/logout/")
-                .then()
-                .spec(emptyBodyResponseSpec)
-                .extract().as(EmptyBodyModel.class)
+            api.auth.logoutWithoutBody()
         );
-        assertEquals(EMPTY_LOGOUT_BODY_ERROR, response.refresh().getFirst());
+
+        step("Проверка сообщения об ошибке", () ->
+            assertEquals(EMPTY_LOGOUT_BODY_ERROR, response.refresh().getFirst())
+        );
     }
 
     @Test
     @DisplayName("Ошибка 404 при неправильном указании basePath")
     public void incorrectBasePath404Test() {
-        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
-        String refreshToken = api.auth.loginAndGetRefreshToken(loginData);
+        LoginBodyModel loginData = step("Подготовка данных для авторизации", () ->
+            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
+        );
 
-        step("Отправка запроса logout с неправильным basePath и проверка ответа (404)", () -> {
-            LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
-            given(logoutRequestSpec)
-                .body(logoutData)
-                .basePath("/api/v2")
-                .when()
-                .post("/auth/logout/")
-                .then()
-                .statusCode(404);
-        });
+        String refreshToken = step("Авторизация и получение refresh-токена", () ->
+            api.auth.loginAndGetRefreshToken(loginData)
+        );
+
+        LogoutBodyModel logoutData = step("Подготовка данных для logout", () ->
+            new LogoutBodyModel(refreshToken)
+        );
+
+        step("Отправка запроса logout с неправильным basePath", () ->
+            api.auth.logoutWithIncorrectBasePath(logoutData)
+        );
     }
 }

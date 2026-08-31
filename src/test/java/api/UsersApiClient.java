@@ -1,17 +1,20 @@
 package api;
 
-import io.restassured.response.Response;
-import io.restassured.specification.ResponseSpecification;
+import models.registration.ExistingUserResponseModel;
 import models.registration.RegistrationBodyModel;
 import models.registration.SuccessfulRegistrationResponseModel;
+import models.user.InvalidEmailResponseModel;
 import models.user.UpdateUserBodyModel;
 import models.user.UserResponseModel;
 
 import static io.restassured.RestAssured.given;
 import static specs.BaseSpec.baseRequestSpec;
+import static specs.registration.RegistrationSpec.existingUserRegistrationResponseSpec;
+import static specs.registration.RegistrationSpec.invalidUserNameRegistrationResponseSpec;
 import static specs.registration.RegistrationSpec.registrationRequestSpec;
 import static specs.registration.RegistrationSpec.successfulRegistrationResponseSpec;
 import static specs.user.UserSpec.userResponse200Spec;
+import static specs.user.UserSpec.userResponse400Spec;
 
 public class UsersApiClient {
 
@@ -27,16 +30,16 @@ public class UsersApiClient {
             .as(UserResponseModel.class);
     }
 
-    public Response updateUserGetResponse(String token, UpdateUserBodyModel body, ResponseSpecification spec) {
+    public InvalidEmailResponseModel updateUserWithInvalidEmail(String token, UpdateUserBodyModel body) {
         return given(baseRequestSpec)
             .header("Authorization", "Bearer " + token)
             .body(body)
             .when()
-            .patch("/users/me/") // или /users/profile/ в зависимости от API
+            .patch("/users/me/")
             .then()
-            .spec(spec)
+            .spec(userResponse400Spec)
             .extract()
-            .response();
+            .as(InvalidEmailResponseModel.class);
     }
 
     public SuccessfulRegistrationResponseModel register(RegistrationBodyModel body) {
@@ -50,14 +53,25 @@ public class UsersApiClient {
             .as(SuccessfulRegistrationResponseModel.class);
     }
 
-    public Response registerWithSpec(RegistrationBodyModel body, ResponseSpecification spec) {
+    public ExistingUserResponseModel registerExistingUser(RegistrationBodyModel body) {
         return given(registrationRequestSpec)
             .body(body)
             .when()
             .post("/users/register/")
             .then()
-            .spec(spec)
+            .spec(existingUserRegistrationResponseSpec)
             .extract()
-            .response();
+            .as(ExistingUserResponseModel.class);
+    }
+
+    public ExistingUserResponseModel registerWithInvalidUsername(RegistrationBodyModel body) {
+        return given(registrationRequestSpec)
+            .body(body)
+            .when()
+            .post("/users/register/")
+            .then()
+            .spec(invalidUserNameRegistrationResponseSpec)
+            .extract()
+            .as(ExistingUserResponseModel.class);
     }
 }
