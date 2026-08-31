@@ -19,27 +19,22 @@ public class UpdateUserTests extends TestBase {
 
     @BeforeEach
     public void auth() {
-        accessToken = step("Получить access-токена", () -> {
-            LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
-            return api.auth.loginAndGetAccessToken(loginData);
-        });
+        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+        accessToken = api.auth.loginAndGetAccessToken(loginData);
     }
 
     @Test
     @DisplayName("Успешное обновление имени, фамилии и email")
     public void successfulUpdateUserTest() {
+        UpdateUserBodyModel updateData = new UpdateUserBodyModel(
+            UPDATED_FIRST_NAME,
+            UPDATED_LAST_NAME,
+            UPDATED_EMAIL
+        );
 
-        UpdateUserBodyModel updateData = step("Подготовка данных для обновления", () ->
-            new UpdateUserBodyModel(
-                UPDATED_FIRST_NAME,
-                UPDATED_LAST_NAME,
-                UPDATED_EMAIL
-            ));
-
-        UserResponseModel response =
-            step("Запрос на обновление профиля с валидным токеном", () ->
-                api.users.updateUser(accessToken, updateData)
-            );
+        UserResponseModel response = step("Запрос на обновление профиля с валидным токеном", () ->
+            api.users.updateUser(accessToken, updateData)
+        );
 
         step("Проверка того, что данные профиля успешно обновились", () -> {
             assertThat(response.firstName()).isEqualTo(UPDATED_FIRST_NAME);
@@ -51,12 +46,10 @@ public class UpdateUserTests extends TestBase {
     @Test
     @DisplayName("Обновление с невалидным email")
     public void wrongPasswordLoginTest() {
-        UpdateUserBodyModel updateData = step("Подготовить данные профиля с невалидным email", () ->
-            new UpdateUserBodyModel(
-                UPDATED_FIRST_NAME,
-                UPDATED_LAST_NAME,
-                INVALID_EMAIL
-            )
+        UpdateUserBodyModel updateData = new UpdateUserBodyModel(
+            UPDATED_FIRST_NAME,
+            UPDATED_LAST_NAME,
+            INVALID_EMAIL
         );
 
         var response = step("Отправить запрос на обновление профиля с некорректным email", () ->

@@ -31,10 +31,7 @@ public class RegistrationTests extends TestBase {
     @Test
     @DisplayName("Успешная регистрация")
     public void successfulRegistrationTest_with_records() {
-
-        RegistrationBodyModel data = step("Подготовка регистрационных данных", () ->
-            new RegistrationBodyModel(username, password)
-        );
+        RegistrationBodyModel data = new RegistrationBodyModel(username, password);
 
         SuccessfulRegistrationResponseModel registrationResponse = step("Отправить POST запрос на регистрацию", () ->
             api.users.register(data)
@@ -49,26 +46,19 @@ public class RegistrationTests extends TestBase {
     @Test
     @DisplayName("Регистрация уже существующего пользователя")
     public void existingUserWrongRegistrationTest() {
+        RegistrationBodyModel data = new RegistrationBodyModel(username, password);
+        api.users.register(data);
 
-        RegistrationBodyModel data = step("Подготовить регистрационные данные", () ->
-            new RegistrationBodyModel(username, password)
+        ExistingUserResponseModel response = step("Зарегистрировать того же пользователя снова", () ->
+            given(registrationRequestSpec)
+                .body(data)
+                .when()
+                .post("/users/register/")
+                .then()
+                .spec(existingUserRegistrationResponseSpec)
+                .extract()
+                .as(ExistingUserResponseModel.class)
         );
-
-        step("Зарегистрировать пользователя в первый раз", () -> {
-            api.users.register(data);
-        });
-
-        ExistingUserResponseModel response =
-            step("Зарегистрировать того же пользователя снова", () ->
-                given(registrationRequestSpec)
-                    .body(data)
-                    .when()
-                    .post("/users/register/")
-                    .then()
-                    .spec(existingUserRegistrationResponseSpec)
-                    .extract()
-                    .as(ExistingUserResponseModel.class)
-            );
 
         step("Проверить сообщение об ошибке", () ->
             assertEquals(REGISTRATION_EXISTING_USER_ERROR, response.username().getFirst())
@@ -78,26 +68,19 @@ public class RegistrationTests extends TestBase {
     @Test
     @DisplayName("Регистрация пользователя с невалидным username")
     public void invalidUsername400Test() {
+        String username = new Faker().name().fullName();
+        RegistrationBodyModel data = new RegistrationBodyModel(username, password);
 
-        String username = step("Сгенерировать невалидный username", () ->
-            new Faker().name().fullName()
+        ExistingUserResponseModel response = step("Отправка запроса на регистрацию с невалидным username", () ->
+            given(registrationRequestSpec)
+                .body(data)
+                .when()
+                .post("/users/register/")
+                .then()
+                .spec(invalidUserNameRegistrationResponseSpec)
+                .extract()
+                .as(ExistingUserResponseModel.class)
         );
-
-        RegistrationBodyModel data = step("Подготовить регистрационные данные", () ->
-            new RegistrationBodyModel(username, password)
-        );
-
-        ExistingUserResponseModel response =
-            step("Отправка запроса на регистрацию с невалидным username", () ->
-                given(registrationRequestSpec)
-                    .body(data)
-                    .when()
-                    .post("/users/register/")
-                    .then()
-                    .spec(invalidUserNameRegistrationResponseSpec)
-                    .extract()
-                    .as(ExistingUserResponseModel.class)
-            );
 
         step("Проверка сообщения об ошибке)", () ->
             assertEquals(REGISTRATION_EXISTING_INVALID_USER_NAME_ERROR, response.username().getFirst())
@@ -107,9 +90,7 @@ public class RegistrationTests extends TestBase {
     @Test
     @DisplayName("Регистрация пользователя с отсутствующим username")
     public void registrationWithoutUsernameTest() {
-        RegistrationBodyModel data = step("Подготовить данные без логина", () ->
-            new RegistrationBodyModel("", password)
-        );
+        RegistrationBodyModel data = new RegistrationBodyModel("", password);
 
         var response = step("Отправить POST запрос на регистрацию с пустым логином", () ->
             api.users.registerWithSpec(data, invalidUserNameRegistrationResponseSpec)

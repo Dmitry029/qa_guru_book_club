@@ -21,13 +21,8 @@ public class LogoutTests extends TestBase {
     @Test
     @DisplayName("Успешный выход из аккаунта с валидным refresh-токеном")
     public void successfulLogoutTest() {
-        LoginBodyModel loginData = step("Подготовка валидных данных для успешного входа", () ->
-            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
-        );
-
-        String refreshToken = step("Авторизация и получение токена", () -> {
-            return api.auth.loginAndGetRefreshToken(loginData);
-        });
+        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+        String refreshToken = api.auth.loginAndGetRefreshToken(loginData);
 
         step("Отправка запроса logout с refresh-токеном и проверка ответа (200)", () -> {
             LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
@@ -38,14 +33,8 @@ public class LogoutTests extends TestBase {
     @Test
     @DisplayName("Неуспешный выход из аккаунта с пустым телом запроса")
     public void logoutWithoutBodyTest() {
-
-        LoginBodyModel loginData = step("Подготовка валидных данных для успешного входа", () ->
-            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
-        );
-
-        step("Авторизация и получение токена", () -> {
-            api.auth.loginAndGetRefreshToken(loginData);
-        });
+        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+        api.auth.loginAndGetRefreshToken(loginData);
 
         EmptyBodyModel response = step("Отправка запроса logout с пустым body", () ->
             given(logoutRequestSpec)
@@ -63,14 +52,8 @@ public class LogoutTests extends TestBase {
     @Test
     @DisplayName("Ошибка 404 при неправильном указании basePath")
     public void incorrectBasePath404Test() {
-
-        LoginBodyModel loginData = step("Подготовка валидных данных для успешного входа", () ->
-            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
-        );
-
-        String refreshToken = step("Авторизация и получение токена", () -> {
-            return api.auth.loginAndGetRefreshToken(loginData);
-        });
+        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
+        String refreshToken = api.auth.loginAndGetRefreshToken(loginData);
 
         step("Отправка запроса logout с неправильным basePath и проверка ответа (404)", () -> {
             LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);

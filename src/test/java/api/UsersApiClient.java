@@ -1,6 +1,5 @@
 package api;
 
-import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import io.restassured.specification.ResponseSpecification;
 import models.registration.RegistrationBodyModel;
@@ -16,7 +15,6 @@ import static specs.user.UserSpec.userResponse200Spec;
 
 public class UsersApiClient {
 
-    @Step("Обновление данных пользователя")
     public UserResponseModel updateUser(String token, UpdateUserBodyModel body) {
         return given(baseRequestSpec)
             .header("Authorization", "Bearer " + token)
@@ -29,7 +27,6 @@ public class UsersApiClient {
             .as(UserResponseModel.class);
     }
 
-    @Step("Обновление данных пользователя")
     public Response updateUserGetResponse(String token, UpdateUserBodyModel body, ResponseSpecification spec) {
         return given(baseRequestSpec)
             .header("Authorization", "Bearer " + token)
@@ -42,7 +39,6 @@ public class UsersApiClient {
             .response();
     }
 
-    @Step("Регистрация пользователя")
     public SuccessfulRegistrationResponseModel register(RegistrationBodyModel body) {
         return given(registrationRequestSpec)
             .body(body)
@@ -54,7 +50,6 @@ public class UsersApiClient {
             .as(SuccessfulRegistrationResponseModel.class);
     }
 
-    @Step("Регистрация пользователя и получение объекта Response")
     public Response registerWithSpec(RegistrationBodyModel body, ResponseSpecification spec) {
         return given(registrationRequestSpec)
             .body(body)
