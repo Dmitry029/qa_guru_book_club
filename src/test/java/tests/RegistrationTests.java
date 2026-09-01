@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import static io.qameta.allure.Allure.step;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static specs.registration.RegistrationSpec.invalidUserNameRegistrationResponseSpec;
 import static tests.TestData.*;
 
 @DisplayName("Регистрация пользователя")
@@ -32,12 +31,10 @@ public class RegistrationTests extends TestBase {
     @Test
     @DisplayName("Успешная регистрация")
     public void successfulRegistrationTest_with_records() {
-        RegistrationBodyModel data = step("Подготовка данных для регистрации", () ->
-            new RegistrationBodyModel(username, password)
-        );
-        SuccessfulRegistrationResponseModel registrationResponse = api.users.register(data);
+        SuccessfulRegistrationResponseModel registrationResponse =
+            api.users.register(new RegistrationBodyModel(username, password));
 
-        step("Проверить значений ответа успешной регистрации", () -> {
+        step("Проверка значений ответа успешной регистрации", () -> {
             assertEquals(username, registrationResponse.username());
             assertThat(registrationResponse.remoteAddr()).matches(REGISTRATION_IP_REGEXP);
         });
@@ -46,11 +43,9 @@ public class RegistrationTests extends TestBase {
     @Test
     @DisplayName("Регистрация уже существующего пользователя")
     public void existingUserWrongRegistrationTest() {
-        RegistrationBodyModel data = step("Подготовка данных для регистрации", () ->
-            new RegistrationBodyModel(username, password)
-        );
-        api.users.register(data);
-        ExistingUserResponseModel response = api.users.registerExistingUser(data);
+        api.users.register(new RegistrationBodyModel(username, password));
+        ExistingUserResponseModel response =
+            api.users.registerExistingUser(new RegistrationBodyModel(username, password));
 
         step("Проверка сообщения об ошибке", () ->
             assertEquals(REGISTRATION_EXISTING_USER_ERROR, response.username().getFirst())
@@ -60,10 +55,9 @@ public class RegistrationTests extends TestBase {
     @Test
     @DisplayName("Регистрация пользователя с невалидным username")
     public void invalidUsername400Test() {
-        RegistrationBodyModel data = step("Подготовка данных с невалидным username", () ->
+        ExistingUserResponseModel response = api.users.registerWithInvalidUsername(
             new RegistrationBodyModel(new Faker().name().fullName(), password)
         );
-        ExistingUserResponseModel response = api.users.registerWithInvalidUsername(data);
 
         step("Проверка сообщения об ошибке", () ->
             assertEquals(REGISTRATION_EXISTING_INVALID_USER_NAME_ERROR, response.username().getFirst())
@@ -73,13 +67,11 @@ public class RegistrationTests extends TestBase {
     @Test
     @DisplayName("Регистрация пользователя с отсутствующим username")
     public void registrationWithoutUsernameTest() {
-        RegistrationBodyModel data = step("Подготовка данных с пустым username", () ->
-            new RegistrationBodyModel("", password)
-        );
-        var response = api.users.registerWithSpec(data, invalidUserNameRegistrationResponseSpec);
+        ExistingUserResponseModel response =
+            api.users.registerWithEmptyUsername(new RegistrationBodyModel("", password));
 
         step("Проверка сообщения об ошибке", () ->
-            assertThat(response.path("username[0]").toString()).isEqualTo(EMPTY_USERNAME_ERROR)
+            assertEquals(EMPTY_USERNAME_ERROR, response.username().getFirst())
         );
     }
 }

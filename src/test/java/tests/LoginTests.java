@@ -15,10 +15,8 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Успешный вход")
     public void successfulLoginTest() {
-        LoginBodyModel loginData = step("Подготовка данных для авторизации", () ->
-            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
-        );
-        SuccessfulLoginResponseModel loginResponse = api.auth.login(loginData);
+        SuccessfulLoginResponseModel loginResponse =
+            api.auth.login(new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD));
 
         step("Проверка полученных данных", () -> {
             String actualAccess = loginResponse.access();
@@ -33,10 +31,8 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Вход с невалидным паролем")
     public void wrongCredentialsLoginTest() {
-        LoginBodyModel loginData = step("Подготовка данных с невалидным паролем", () ->
-            new LoginBodyModel(LOGIN_USERNAME, LOGIN_WRONG_PASSWORD)
-        );
-        WrongCredentialsLoginResponseModel loginResponse = api.auth.loginWithInvalidPassword(loginData);
+        WrongCredentialsLoginResponseModel loginResponse =
+            api.auth.loginWithInvalidPassword(new LoginBodyModel(LOGIN_USERNAME, LOGIN_WRONG_PASSWORD));
 
         step("Проверка сообщения об ошибке", () ->
             assertThat(loginResponse.detail()).isEqualTo(LOGIN_WRONG_CREDENTIALS_ERROR)
@@ -46,10 +42,8 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Вход с пустым username")
     public void emptyUsernameLoginTest() {
-        LoginBodyModel loginData = step("Подготовка данных с пустым username", () ->
-            new LoginBodyModel("", LOGIN_PASSWORD)
-        );
-        EmptyUsernameResponseModel response = api.auth.loginWithEmptyUsername(loginData);
+        EmptyUsernameResponseModel response =
+            api.auth.loginWithEmptyUsername(new LoginBodyModel("", LOGIN_PASSWORD));
 
         step("Проверка сообщения об ошибке", () ->
             assertEquals(EMPTY_USERNAME_ERROR, response.username().getFirst())
@@ -59,10 +53,8 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Вход с пустым password")
     public void emptyPasswordLoginTest() {
-        LoginBodyModel loginData = step("Подготовка данных с пустым password", () ->
-            new LoginBodyModel(LOGIN_USERNAME, "")
-        );
-        EmptyPasswordResponseModel response = api.auth.loginWithEmptyPassword(loginData);
+        EmptyPasswordResponseModel response =
+            api.auth.loginWithEmptyPassword(new LoginBodyModel(LOGIN_USERNAME, ""));
 
         step("Проверка сообщения об ошибке", () ->
             assertEquals(EMPTY_PASSWORD_ERROR, response.password().getFirst())
@@ -72,10 +64,8 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Вход с пустыми password и username")
     public void emptyCredentialsLoginTest() {
-        LoginBodyModel loginData = step("Подготовка данных с пустыми username и password", () ->
-            new LoginBodyModel("", "")
-        );
-        EmptyCredentialsResponseModel response = api.auth.loginWithEmptyCredentials(loginData);
+        EmptyCredentialsResponseModel response =
+            api.auth.loginWithEmptyCredentials(new LoginBodyModel("", ""));
 
         step("Проверка сообщения об ошибке", () -> {
             assertEquals(EMPTY_USERNAME_ERROR, response.username().getFirst());

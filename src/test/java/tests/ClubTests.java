@@ -22,9 +22,7 @@ public class ClubTests extends TestBase {
 
     @BeforeEach
     public void auth() {
-        LoginBodyModel loginData = step("Подготовка данных для авторизации", () ->
-            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
-        );
+        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
         accessToken = api.auth.loginAndGetAccessToken(loginData);
     }
 

@@ -20,9 +20,7 @@ public class LogoutTests extends TestBase {
 
     @BeforeEach
     public void prepareLoginData() {
-        loginData = step("Подготовка данных для авторизации", () ->
-            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
-        );
+        loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
     }
 
     @Test

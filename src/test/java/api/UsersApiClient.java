@@ -1,11 +1,10 @@
 package api;
 
 import io.qameta.allure.Step;
-import io.restassured.response.Response;
-import io.restassured.specification.ResponseSpecification;
 import models.registration.ExistingUserResponseModel;
 import models.registration.RegistrationBodyModel;
 import models.registration.SuccessfulRegistrationResponseModel;
+import models.user.InvalidEmailResponseModel;
 import models.user.UpdateUserBodyModel;
 import models.user.UserResponseModel;
 
@@ -16,6 +15,7 @@ import static specs.registration.RegistrationSpec.invalidUserNameRegistrationRes
 import static specs.registration.RegistrationSpec.registrationRequestSpec;
 import static specs.registration.RegistrationSpec.successfulRegistrationResponseSpec;
 import static specs.user.UserSpec.userResponse200Spec;
+import static specs.user.UserSpec.userResponse400Spec;
 
 public class UsersApiClient {
 
@@ -32,17 +32,17 @@ public class UsersApiClient {
             .as(UserResponseModel.class);
     }
 
-    @Step("Обновление профиля пользователя")
-    public Response updateUserGetResponse(String token, UpdateUserBodyModel body, ResponseSpecification spec) {
+    @Step("Обновление профиля с невалидным email")
+    public InvalidEmailResponseModel updateUserWithInvalidEmail(String token, UpdateUserBodyModel body) {
         return given(baseRequestSpec)
             .header("Authorization", "Bearer " + token)
             .body(body)
             .when()
-            .patch("/users/me/") // или /users/profile/ в зависимости от API
+            .patch("/users/me/")
             .then()
-            .spec(spec)
+            .spec(userResponse400Spec)
             .extract()
-            .response();
+            .as(InvalidEmailResponseModel.class);
     }
 
     @Step("Регистрация пользователя")
@@ -55,18 +55,6 @@ public class UsersApiClient {
             .spec(successfulRegistrationResponseSpec)
             .extract()
             .as(SuccessfulRegistrationResponseModel.class);
-    }
-
-    @Step("Регистрация пользователя")
-    public Response registerWithSpec(RegistrationBodyModel body, ResponseSpecification spec) {
-        return given(registrationRequestSpec)
-            .body(body)
-            .when()
-            .post("/users/register/")
-            .then()
-            .spec(spec)
-            .extract()
-            .response();
     }
 
     @Step("Регистрация существующего пользователя")
@@ -83,6 +71,18 @@ public class UsersApiClient {
 
     @Step("Регистрация с невалидным username")
     public ExistingUserResponseModel registerWithInvalidUsername(RegistrationBodyModel body) {
+        return given(registrationRequestSpec)
+            .body(body)
+            .when()
+            .post("/users/register/")
+            .then()
+            .spec(invalidUserNameRegistrationResponseSpec)
+            .extract()
+            .as(ExistingUserResponseModel.class);
+    }
+
+    @Step("Регистрация с пустым username")
+    public ExistingUserResponseModel registerWithEmptyUsername(RegistrationBodyModel body) {
         return given(registrationRequestSpec)
             .body(body)
             .when()
