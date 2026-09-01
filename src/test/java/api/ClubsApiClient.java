@@ -1,5 +1,6 @@
 package api;
 
+import io.qameta.allure.Step;
 import models.club.BlankBookTitleResponseModel;
 import models.club.ClubBodyModel;
 import models.club.ClubListResponseModel;
@@ -19,6 +20,7 @@ import static specs.club.ClubSpec.clubUnauthorizedResponseSpec;
 
 public class ClubsApiClient {
 
+    @Step("Получение списка клубов")
     public ClubListResponseModel getClubs() {
         return given(clubRequestSpec)
             .when()
@@ -29,6 +31,7 @@ public class ClubsApiClient {
             .as(ClubListResponseModel.class);
     }
 
+    @Step("Поиск клубов")
     public ClubListResponseModel getClubsBySearch(String search) {
         return given(clubRequestSpec)
             .queryParam("search", search)
@@ -40,6 +43,7 @@ public class ClubsApiClient {
             .as(ClubListResponseModel.class);
     }
 
+    @Step("Получение клуба по id")
     public ClubResponseModel getClub(int id) {
         return given(clubRequestSpec)
             .when()
@@ -50,6 +54,7 @@ public class ClubsApiClient {
             .as(ClubResponseModel.class);
     }
 
+    @Step("Создание клуба")
     public ClubResponseModel createClub(String token, ClubBodyModel body) {
         return given(clubRequestSpec)
             .header("Authorization", "Bearer " + token)
@@ -62,6 +67,7 @@ public class ClubsApiClient {
             .as(ClubResponseModel.class);
     }
 
+    @Step("Создание клуба без авторизации")
     public DetailErrorResponseModel createClubUnauthorized(ClubBodyModel body) {
         return given(clubRequestSpec)
             .body(body)
@@ -73,6 +79,7 @@ public class ClubsApiClient {
             .as(DetailErrorResponseModel.class);
     }
 
+    @Step("Создание клуба с пустым названием книги")
     public BlankBookTitleResponseModel createClubWithBlankTitle(String token, ClubBodyModel body) {
         return given(clubRequestSpec)
             .header("Authorization", "Bearer " + token)
@@ -85,6 +92,7 @@ public class ClubsApiClient {
             .as(BlankBookTitleResponseModel.class);
     }
 
+    @Step("Полное обновление клуба")
     public ClubResponseModel updateClub(String token, int id, ClubBodyModel body) {
         return given(clubRequestSpec)
             .header("Authorization", "Bearer " + token)
@@ -97,6 +105,7 @@ public class ClubsApiClient {
             .as(ClubResponseModel.class);
     }
 
+    @Step("Частичное обновление клуба")
     public ClubResponseModel patchClub(String token, int id, PatchClubBodyModel body) {
         return given(clubRequestSpec)
             .header("Authorization", "Bearer " + token)
@@ -109,6 +118,7 @@ public class ClubsApiClient {
             .as(ClubResponseModel.class);
     }
 
+    @Step("Удаление клуба")
     public void deleteClub(String token, int id) {
         given(clubRequestSpec)
             .header("Authorization", "Bearer " + token)
@@ -118,6 +128,7 @@ public class ClubsApiClient {
             .spec(clubDeletedResponseSpec);
     }
 
+    @Step("Получение несуществующего клуба")
     public DetailErrorResponseModel getMissingClub(int id) {
         return given(clubRequestSpec)
             .when()

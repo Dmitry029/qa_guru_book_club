@@ -1,5 +1,6 @@
 package tests;
 
+import io.qameta.allure.Step;
 import models.club.*;
 import models.login.LoginBodyModel;
 import net.datafaker.Faker;
@@ -24,10 +25,7 @@ public class ClubTests extends TestBase {
         LoginBodyModel loginData = step("Подготовка данных для авторизации", () ->
             new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
         );
-
-        accessToken = step("Авторизация и получение access-токена", () ->
-            api.auth.loginAndGetAccessToken(loginData)
-        );
+        accessToken = api.auth.loginAndGetAccessToken(loginData);
     }
 
     @AfterEach
@@ -46,9 +44,7 @@ public class ClubTests extends TestBase {
     @Test
     @DisplayName("Получение списка клубов")
     public void getClubsListTest() {
-        ClubListResponseModel response = step("Отправка запроса на получение списка клубов", () ->
-            api.clubs.getClubs()
-        );
+        ClubListResponseModel response = api.clubs.getClubs();
 
         step("Проверка списка клубов", () -> {
             assertThat(response.count()).isGreaterThan(0);
@@ -61,11 +57,8 @@ public class ClubTests extends TestBase {
     @Test
     @DisplayName("Получение клуба по id")
     public void getClubByIdTest() {
-        ClubResponseModel createdClub = step("Создание клуба", this::createClub);
-
-        ClubResponseModel response = step("Отправка запроса на получение клуба по id", () ->
-            api.clubs.getClub(createdClub.id())
-        );
+        ClubResponseModel createdClub = createClub();
+        ClubResponseModel response = api.clubs.getClub(createdClub.id());
 
         step("Проверка данных клуба", () -> {
             assertThat(response.id()).isEqualTo(createdClub.id());
@@ -80,11 +73,8 @@ public class ClubTests extends TestBase {
     @Test
     @DisplayName("Создание клуба")
     public void createClubTest() {
-        ClubBodyModel clubData = step("Подготовка данных для создания клуба", this::newClubBody);
-
-        ClubResponseModel response = step("Отправка запроса на создание клуба", () ->
-            api.clubs.createClub(accessToken, clubData)
-        );
+        ClubBodyModel clubData = newClubBody();
+        ClubResponseModel response = api.clubs.createClub(accessToken, clubData);
         createdClubId = response.id();
 
         step("Проверка созданного клуба", () -> {
@@ -102,12 +92,9 @@ public class ClubTests extends TestBase {
     @Test
     @DisplayName("Полное обновление клуба (PUT)")
     public void updateClubTest() {
-        ClubResponseModel createdClub = step("Создание клуба", this::createClub);
-        ClubBodyModel updateData = step("Подготовка данных для обновления клуба", this::newClubBody);
-
-        ClubResponseModel response = step("Отправка PUT-запроса на обновление клуба", () ->
-            api.clubs.updateClub(accessToken, createdClub.id(), updateData)
-        );
+        ClubResponseModel createdClub = createClub();
+        ClubBodyModel updateData = newClubBody();
+        ClubResponseModel response = api.clubs.updateClub(accessToken, createdClub.id(), updateData);
 
         step("Проверка обновлённых данных клуба", () -> {
             assertThat(response.id()).isEqualTo(createdClub.id());
@@ -122,14 +109,11 @@ public class ClubTests extends TestBase {
     @Test
     @DisplayName("Частичное обновление клуба (PATCH)")
     public void patchClubTest() {
-        ClubResponseModel createdClub = step("Создание клуба", this::createClub);
+        ClubResponseModel createdClub = createClub();
         PatchClubBodyModel patchData = step("Подготовка данных для частичного обновления", () ->
             new PatchClubBodyModel(faker.lorem().sentence())
         );
-
-        ClubResponseModel response = step("Отправка PATCH-запроса на обновление описания клуба", () ->
-            api.clubs.patchClub(accessToken, createdClub.id(), patchData)
-        );
+        ClubResponseModel response = api.clubs.patchClub(accessToken, createdClub.id(), patchData);
 
         step("Проверка, что изменилось только описание", () -> {
             assertThat(response.id()).isEqualTo(createdClub.id());
@@ -144,15 +128,9 @@ public class ClubTests extends TestBase {
     @Test
     @DisplayName("Удаление клуба")
     public void deleteClubTest() {
-        ClubResponseModel createdClub = step("Создание клуба", this::createClub);
-
-        step("Отправка запроса на удаление клуба", () ->
-            api.clubs.deleteClub(accessToken, createdClub.id())
-        );
-
-        DetailErrorResponseModel response = step("Повторное получение удалённого клуба", () ->
-            api.clubs.getMissingClub(createdClub.id())
-        );
+        ClubResponseModel createdClub = createClub();
+        api.clubs.deleteClub(accessToken, createdClub.id());
+        DetailErrorResponseModel response = api.clubs.getMissingClub(createdClub.id());
 
         step("Проверка, что клуб не найден", () ->
             assertThat(response.detail()).isEqualTo(NOT_FOUND_ERROR)
@@ -163,11 +141,8 @@ public class ClubTests extends TestBase {
     @Test
     @DisplayName("Поиск клуба по названию книги")
     public void searchClubTest() {
-        ClubResponseModel createdClub = step("Создание клуба", this::createClub);
-
-        ClubListResponseModel response = step("Отправка запроса на поиск клуба", () ->
-            api.clubs.getClubsBySearch(createdClub.bookTitle())
-        );
+        ClubResponseModel createdClub = createClub();
+        ClubListResponseModel response = api.clubs.getClubsBySearch(createdClub.bookTitle());
 
         step("Проверка, что созданный клуб есть в результатах поиска", () -> {
             assertThat(response.count()).isGreaterThan(0);
@@ -180,11 +155,8 @@ public class ClubTests extends TestBase {
     @Test
     @DisplayName("Создание клуба без авторизации")
     public void createClubUnauthorizedTest() {
-        ClubBodyModel clubData = step("Подготовка данных для создания клуба", this::newClubBody);
-
-        DetailErrorResponseModel response = step("Отправка запроса на создание клуба без токена", () ->
-            api.clubs.createClubUnauthorized(clubData)
-        );
+        ClubBodyModel clubData = newClubBody();
+        DetailErrorResponseModel response = api.clubs.createClubUnauthorized(clubData);
 
         step("Проверка сообщения об ошибке", () ->
             assertThat(response.detail()).isEqualTo(AUTH_CREDENTIALS_ERROR)
@@ -203,10 +175,7 @@ public class ClubTests extends TestBase {
                 CLUB_TELEGRAM_LINK
             )
         );
-
-        BlankBookTitleResponseModel response = step("Отправка запроса на создание клуба с пустым названием", () ->
-            api.clubs.createClubWithBlankTitle(accessToken, clubData)
-        );
+        BlankBookTitleResponseModel response = api.clubs.createClubWithBlankTitle(accessToken, clubData);
 
         step("Проверка сообщения об ошибке", () ->
             assertThat(response.bookTitle().getFirst()).isEqualTo(EMPTY_FIELD_ERROR)
@@ -216,15 +185,14 @@ public class ClubTests extends TestBase {
     @Test
     @DisplayName("Получение несуществующего клуба")
     public void getNonexistentClubTest() {
-        DetailErrorResponseModel response = step("Отправка запроса на получение несуществующего клуба", () ->
-            api.clubs.getMissingClub(NONEXISTENT_CLUB_ID)
-        );
+        DetailErrorResponseModel response = api.clubs.getMissingClub(NONEXISTENT_CLUB_ID);
 
         step("Проверка сообщения об ошибке", () ->
             assertThat(response.detail()).isEqualTo(NOT_FOUND_ERROR)
         );
     }
 
+    @Step("Подготовка данных для создания клуба")
     private ClubBodyModel newClubBody() {
         return new ClubBodyModel(
             "QA Club " + faker.book().title() + " " + faker.number().digits(6),
@@ -235,6 +203,7 @@ public class ClubTests extends TestBase {
         );
     }
 
+    @Step("Создание клуба")
     private ClubResponseModel createClub() {
         ClubResponseModel club = api.clubs.createClub(accessToken, newClubBody());
         createdClubId = club.id();

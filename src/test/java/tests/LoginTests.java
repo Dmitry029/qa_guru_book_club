@@ -5,10 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.qameta.allure.Allure.step;
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static specs.login.LoginSpec.*;
 import static tests.TestData.*;
 
 @DisplayName("Вход в аккаунт")
@@ -17,19 +15,17 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Успешный вход")
     public void successfulLoginTest() {
-        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD);
-
-        SuccessfulLoginResponseModel loginResponse = step("Авторизация", () ->
-            api.auth.login(loginData)
+        LoginBodyModel loginData = step("Подготовка данных для авторизации", () ->
+            new LoginBodyModel(LOGIN_USERNAME, LOGIN_PASSWORD)
         );
+        SuccessfulLoginResponseModel loginResponse = api.auth.login(loginData);
 
         step("Проверка полученных данных", () -> {
-            String expectedTokenPath = LOGIN_TOKEN_PREFIX;
             String actualAccess = loginResponse.access();
             String actualRefresh = loginResponse.refresh();
 
-            assertThat(actualAccess).startsWith(expectedTokenPath);
-            assertThat(actualRefresh).startsWith(expectedTokenPath);
+            assertThat(actualAccess).startsWith(LOGIN_TOKEN_PREFIX);
+            assertThat(actualRefresh).startsWith(LOGIN_TOKEN_PREFIX);
             assertThat(actualAccess).isNotEqualTo(actualRefresh);
         });
     }
@@ -37,19 +33,12 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Вход с невалидным паролем")
     public void wrongCredentialsLoginTest() {
-        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, LOGIN_WRONG_PASSWORD);
-
-        WrongCredentialsLoginResponseModel loginResponse = step("Отправка запроса с невалидным паролем", () ->
-            given(loginRequestSpec)
-                .body(loginData)
-                .when()
-                .post("/auth/token/")
-                .then()
-                .spec(wrongCredentialsLoginResponseSpec)
-                .extract().as(WrongCredentialsLoginResponseModel.class)
+        LoginBodyModel loginData = step("Подготовка данных с невалидным паролем", () ->
+            new LoginBodyModel(LOGIN_USERNAME, LOGIN_WRONG_PASSWORD)
         );
+        WrongCredentialsLoginResponseModel loginResponse = api.auth.loginWithInvalidPassword(loginData);
 
-        step("Проверить сообщение об ошибке", () ->
+        step("Проверка сообщения об ошибке", () ->
             assertThat(loginResponse.detail()).isEqualTo(LOGIN_WRONG_CREDENTIALS_ERROR)
         );
     }
@@ -57,19 +46,12 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Вход с пустым username")
     public void emptyUsernameLoginTest() {
-        LoginBodyModel loginData = new LoginBodyModel("", LOGIN_PASSWORD);
-
-        EmptyUsernameResponseModel response = step("Отправка запроса с пустым username", () ->
-            given(loginRequestSpec)
-                .body(loginData)
-                .when()
-                .post("/auth/token/")
-                .then()
-                .spec(emptyUsernameLoginResponseSpec)
-                .extract().as(EmptyUsernameResponseModel.class)
+        LoginBodyModel loginData = step("Подготовка данных с пустым username", () ->
+            new LoginBodyModel("", LOGIN_PASSWORD)
         );
+        EmptyUsernameResponseModel response = api.auth.loginWithEmptyUsername(loginData);
 
-        step("Проверить сообщение об ошибке", () ->
+        step("Проверка сообщения об ошибке", () ->
             assertEquals(EMPTY_USERNAME_ERROR, response.username().getFirst())
         );
     }
@@ -77,19 +59,12 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Вход с пустым password")
     public void emptyPasswordLoginTest() {
-        LoginBodyModel loginData = new LoginBodyModel(LOGIN_USERNAME, "");
-
-        EmptyPasswordResponseModel response = step("Отправка запроса с пустым password", () ->
-            given(loginRequestSpec)
-                .body(loginData)
-                .when()
-                .post("/auth/token/")
-                .then()
-                .spec(emptyPasswordLoginResponseSpec)
-                .extract().as(EmptyPasswordResponseModel.class)
+        LoginBodyModel loginData = step("Подготовка данных с пустым password", () ->
+            new LoginBodyModel(LOGIN_USERNAME, "")
         );
+        EmptyPasswordResponseModel response = api.auth.loginWithEmptyPassword(loginData);
 
-        step("Проверить сообщение об ошибке", () ->
+        step("Проверка сообщения об ошибке", () ->
             assertEquals(EMPTY_PASSWORD_ERROR, response.password().getFirst())
         );
     }
@@ -97,19 +72,12 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Вход с пустыми password и username")
     public void emptyCredentialsLoginTest() {
-        LoginBodyModel loginData = new LoginBodyModel("", "");
-
-        EmptyCredentialsResponseModel response = step("Отправка запроса с пустыми данными", () ->
-            given(loginRequestSpec)
-                .body(loginData)
-                .when()
-                .post("/auth/token/")
-                .then()
-                .spec(emptyCredentialsResponseSpec)
-                .extract().as(EmptyCredentialsResponseModel.class)
+        LoginBodyModel loginData = step("Подготовка данных с пустыми username и password", () ->
+            new LoginBodyModel("", "")
         );
+        EmptyCredentialsResponseModel response = api.auth.loginWithEmptyCredentials(loginData);
 
-        step("Проверить сообщение об ошибке", () -> {
+        step("Проверка сообщения об ошибке", () -> {
             assertEquals(EMPTY_USERNAME_ERROR, response.username().getFirst());
             assertEquals(EMPTY_PASSWORD_ERROR, response.password().getFirst());
         });
